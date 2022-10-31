@@ -50,6 +50,8 @@ where
     }
 }
 
+const ECITY_TOKEN_ID: &[u8] = b"ECITY-123456";
+
 #[test]
 fn deploy_test() {
     let mut setup = setup_contract(router_sc::contract_obj);
@@ -159,4 +161,130 @@ fn add_token_test() {
             },
         )
         .assert_ok();
+}
+
+#[test]
+fn set_all_and_distribute_test() {
+    let mut setup = setup_contract(router_sc::contract_obj);
+    let setup2 = setup_contract(router_sc::contract_obj);
+    let setup3 = setup_contract(router_sc::contract_obj);
+
+    // Sets the token identifier of the token to be distributed
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.set_token(
+                    TokenIdentifier::from(ECITY_TOKEN_ID),
+                );
+            },
+        )
+        .assert_ok();
+
+    // Sets the contract's balance to 1000 tokens
+    setup
+        .blockchain_wrapper
+        .set_esdt_balance(&setup.contract_wrapper.address_ref(), ECITY_TOKEN_ID, &rust_biguint!(1000u64));
+
+    // Sets the distribution to 50% for user_a
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup2.user_a_address),
+                    5000,
+                );
+            },
+        )
+        .assert_ok();
+
+    // Sets the distribution to 50% for user_b
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup3.user_b_address),
+                    5000,
+                );
+            },
+        )
+        .assert_ok();
+
+    // Distributes the tokens to the users
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.distribute();
+            },
+        )
+        .assert_ok();
+
+    // Checks the contract's balance
+    setup
+        .blockchain_wrapper
+        .check_esdt_balance(&setup.contract_wrapper.address_ref(), ECITY_TOKEN_ID, &rust_biguint!(0u64));
+
+    // Checks user_a's balance
+    setup
+        .blockchain_wrapper
+        .check_esdt_balance(&setup.user_a_address, ECITY_TOKEN_ID, &rust_biguint!(500u64));
+
+    // Checks user_b's balance
+    setup
+        .blockchain_wrapper
+        .check_esdt_balance(&setup.user_b_address, ECITY_TOKEN_ID, &rust_biguint!(500u64));
+}
+
+#[test]
+fn more_than_100_percent_test() {
+    let mut setup = setup_contract(router_sc::contract_obj);
+    let setup2 = setup_contract(router_sc::contract_obj);
+    let setup3 = setup_contract(router_sc::contract_obj);
+
+    // Sets the distribution to 100% for user_a
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup2.user_a_address),
+                    10000,
+                );
+            },
+        )
+        .assert_ok();
+
+    // Sets the distribution to 100% for user_b
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup3.user_b_address),
+                    10000,
+                );
+            },
+        )
+        .assert_user_error("Total percentage must be less than or equal to 10000");
 }
