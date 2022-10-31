@@ -8,6 +8,7 @@ elrond_wasm_node::wasm_endpoints! {
     router_sc
     (
         addDistribution
+        addToken
         distribute
         removeDistribution
     )

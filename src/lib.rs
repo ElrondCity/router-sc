@@ -41,6 +41,12 @@ pub trait Router {
     }
 
     #[only_owner]
+    #[endpoint(addToken)]
+    fn set_token(&self, token_id: TokenIdentifier) {
+        self.ecity_token_id().set(&token_id);
+    }
+
+    #[only_owner]
     #[endpoint(distribute)]
     fn distribute(&self) {
         let mut total_percentage = 0;

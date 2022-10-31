@@ -1,8 +1,8 @@
-use elrond_wasm::types::Address;
+use elrond_wasm::types::{Address, ManagedAddress, TokenIdentifier};
 use elrond_wasm_debug::{rust_biguint, testing_framework::*, DebugApi};
 use router_sc::*;
 
-const WASM_PATH: &'static str = "output/empty.wasm";
+const WASM_PATH: &'static str = "output/router-sc.wasm";
 
 struct ContractSetup<ContractObjBuilder>
 where
@@ -10,6 +10,8 @@ where
 {
     pub blockchain_wrapper: BlockchainStateWrapper,
     pub owner_address: Address,
+    pub user_a_address: Address,
+    pub user_b_address: Address,
     pub contract_wrapper: ContractObjWrapper<router_sc::ContractObj<DebugApi>, ContractObjBuilder>,
 }
 
@@ -22,6 +24,8 @@ where
     let rust_zero = rust_biguint!(0u64);
     let mut blockchain_wrapper = BlockchainStateWrapper::new();
     let owner_address = blockchain_wrapper.create_user_account(&rust_zero);
+    let user_a_address = blockchain_wrapper.create_user_account(&rust_zero);
+    let user_b_address = blockchain_wrapper.create_user_account(&rust_zero);
     let cf_wrapper = blockchain_wrapper.create_sc_account(
         &rust_zero,
         Some(&owner_address),
@@ -40,6 +44,8 @@ where
     ContractSetup {
         blockchain_wrapper,
         owner_address,
+        user_a_address,
+        user_b_address,
         contract_wrapper: cf_wrapper,
     }
 }
@@ -57,6 +63,99 @@ fn deploy_test() {
             &rust_biguint!(0u64),
             |sc| {
                 sc.init();
+            },
+        )
+        .assert_ok();
+}
+
+#[test]
+fn add_distribution_test() {
+    let mut setup = setup_contract(router_sc::contract_obj);
+    let setup2 = setup_contract(router_sc::contract_obj);
+
+    // Sets the distribution to 100% for user_a
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup2.user_a_address),
+                    10000,
+                );
+            },
+        )
+        .assert_ok();
+}
+
+#[test]
+fn remove_distribution_test() {
+    let mut setup = setup_contract(router_sc::contract_obj);
+    let setup2 = setup_contract(router_sc::contract_obj);
+    let setup3 = setup_contract(router_sc::contract_obj);
+
+    // simulate deploy
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.init();
+            },
+        )
+        .assert_ok();
+
+    // Sets the distribution to 100% for user_a
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup2.user_a_address),
+                    10000,
+                );
+            },
+        )
+        .assert_ok();
+
+    // Removes the distribution for user_a
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.remove_distribution(
+                    ManagedAddress::from(setup3.user_a_address),
+                );
+            },
+        )
+        .assert_ok();
+}
+
+#[test]
+fn add_token_test() {
+    let mut setup = setup_contract(router_sc::contract_obj);
+
+    // Sets the token identifier of the token to be distributed
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.set_token(
+                    TokenIdentifier::from("ECITY-123456"),
+                );
             },
         )
         .assert_ok();
