@@ -58,14 +58,14 @@ removeDistribution() {
 }
 
 setToken() {
-    tokenId=${1}
+    tokenId="0x$(echo -n ${1} | xxd -p -u | tr -d '\n')"
 
     echo "Setting token: ${tokenId}"
 
     erdpy --verbose contract call ${ADDRESS} --recall-nonce ${PRIVATE_KEY} \
             --gas-limit=50000000 \
             --proxy=${PROXY} --chain=${CHAIN_ID} \
-            --function="setToken" \
+            --function="addToken" \
             --arguments ${tokenId} \
             --send
     echo $?
