@@ -1,6 +1,6 @@
-# Elrond City Sale SC
+# Elrond City Router SC
 
-Elrond City SFT Sale SC
+Elrond City router
 
 ## Setup
 
