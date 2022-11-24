@@ -1,2 +1,27 @@
-# router-sc
-The router smart contract that distributes the newly minted token to the Active and Passive reward systems
+# Elrond City Sale SC
+
+Elrond City SFT Sale SC
+
+## Setup
+
+These endpoint must be called just after deploying the contract in order:
+
+## Endpoints
+
+### Public
+
+### Private
+
+- **addDistribution**(address: `ManagedAddress`, percentage: `u64`)
+- **removeDistribution**(address: `ManagedAddress`)
+- **addToken**(token_id: `TokenIdentifier`)
+- **distribute**()
+
+## Views
+
+### Backend
+
+### Frontend
+
+## DTOs
+
