@@ -11,9 +11,11 @@ pub trait Router {
     // Maps the reward contract addresses to the reward percentages they will receive.
     // The percentages are stored as u64, but they are actually percentages with 2 decimals (e.g. 10000 = 100%).
     // Percentages MUST add up to 100%.
+    #[view(distribution)]
     #[storage_mapper("distribution")]
     fn distribution(&self) -> MapMapper<ManagedAddress, u64>;
 
+    #[view(ecityTokenId)]
     #[storage_mapper("ecity_token_id")]
     fn ecity_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
