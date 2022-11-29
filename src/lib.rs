@@ -46,15 +46,19 @@ pub trait Router {
         self.ecity_token_id().set(&token_id);
     }
 
-    #[only_owner]
+    #[payable("*")]
     #[endpoint(distribute)]
     fn distribute(&self) {
         let mut total_percentage = 0;
-        for (address, percentage) in self.distribution().iter() {
+        for (_address, percentage) in self.distribution().iter() {
             total_percentage += percentage;
         }
 
         require!(total_percentage == 10000, "Total percentage must be 10000");
+
+        let (payment_token, _payment_value) = self.call_value().single_fungible_esdt();
+
+        require!(payment_token == self.ecity_token_id().get(), "Invalid token");
         
         let wrapped_id = EgldOrEsdtTokenIdentifier::esdt(self.ecity_token_id().get());
         let ecity_amount = self.blockchain().get_sc_balance(&wrapped_id, 0); 

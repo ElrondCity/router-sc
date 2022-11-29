@@ -1,0 +1,82 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.66.0-nightly",
+            "commitHash": "0da281b6068a7d889ae89a9bd8991284cc9b7535",
+            "commitDate": "2022-10-27",
+            "channel": "Nightly",
+            "short": "rustc 1.66.0-nightly (0da281b60 2022-10-27)"
+        },
+        "contractCrate": {
+            "name": "router-sc",
+            "version": "0.0.0",
+            "git_version": "9eacce2-modified"
+        },
+        "framework": {
+            "name": "elrond-wasm",
+            "version": "0.36.0"
+        }
+    },
+    "docs": [
+        "Elrond City's router smart contract. Distributes the newly minted $ECITY to the reward contracts."
+    ],
+    "name": "Router",
+    "constructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "addDistribution",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "percentage",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeDistribution",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "addToken",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "distribute",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [],
+            "outputs": []
+        }
+    ],
+    "events": [],
+    "hasCallback": false,
+    "types": {}
+}
