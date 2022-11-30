@@ -17,9 +17,13 @@ pub trait Router {
     #[storage_mapper("ecity_token_id")]
     fn ecity_token_id(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    #[storage_mapper("locked")] // Once locked, the distribution cannot be changed.
+    fn locked(&self) -> SingleValueMapper<bool>;
+
     #[only_owner]
     #[endpoint(addDistribution)]
     fn add_distribution(&self, address: ManagedAddress, percentage: u64) {
+        require!(!self.locked().get(), "Distribution is locked");
         require!(percentage > 0, "Percentage must be greater than 0");
         require!(percentage <= 10000, "Percentage must be less than or equal to 10000");
 
@@ -37,7 +41,14 @@ pub trait Router {
     #[only_owner]
     #[endpoint(removeDistribution)]
     fn remove_distribution(&self, address: ManagedAddress) {
+        require!(!self.locked().get(), "Distribution is locked");
         self.distribution().remove(&address);
+    }
+
+    #[only_owner]
+    #[endpoint(lockDistribution)]
+    fn lock_distribution(&self) {
+        self.locked().set(&true);
     }
 
     #[only_owner]
