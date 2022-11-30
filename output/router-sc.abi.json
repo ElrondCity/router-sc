@@ -10,7 +10,7 @@
         "contractCrate": {
             "name": "router-sc",
             "version": "0.0.0",
-            "git_version": "9eacce2-modified"
+            "git_version": "385ab5d-modified"
         },
         "framework": {
             "name": "elrond-wasm",
@@ -52,6 +52,13 @@
                     "type": "Address"
                 }
             ],
+            "outputs": []
+        },
+        {
+            "name": "lockDistribution",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
             "outputs": []
         },
         {
