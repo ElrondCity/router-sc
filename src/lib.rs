@@ -30,8 +30,8 @@ pub trait Router {
         require!(percentage <= 10000, "Percentage must be less than or equal to 10000");
 
         let mut total_percentage = 0;
-        for (address, percentage) in self.distribution().iter() {
-            total_percentage += percentage;
+        for (_address, perc) in self.distribution().iter() {
+            total_percentage += perc;
         }
 
         require!(total_percentage + percentage <= 10000, "Total percentage must be less than or equal to 10000");
