@@ -184,10 +184,10 @@ fn set_all_and_distribute_test() {
         )
         .assert_ok();
 
-    // Sets the contract's balance to 1000 tokens
+    // Sets the owner's balance to 1000 tokens
     setup
         .blockchain_wrapper
-        .set_esdt_balance(&setup.contract_wrapper.address_ref(), ECITY_TOKEN_ID, &rust_biguint!(1000u64));
+        .set_esdt_balance(&setup.owner_address, ECITY_TOKEN_ID, &rust_biguint!(1000u64));
 
     // Sets the distribution to 50% for user_a
     setup
@@ -224,10 +224,12 @@ fn set_all_and_distribute_test() {
     // Distributes the tokens to the users
     setup
         .blockchain_wrapper
-        .execute_tx(
+        .execute_esdt_transfer(
             &setup.owner_address,
             &setup.contract_wrapper,
-            &rust_biguint!(0u64),
+            ECITY_TOKEN_ID,
+            0u64,
+            &rust_biguint!(1000u64),
             |sc| {
                 sc.distribute();
             },
@@ -287,4 +289,56 @@ fn more_than_100_percent_test() {
             },
         )
         .assert_user_error("Total percentage must be less than or equal to 10000");
+}
+
+#[test]
+fn lock_and_change() {
+    let mut setup = setup_contract(router_sc::contract_obj);
+    let setup2 = setup_contract(router_sc::contract_obj);
+    let setup3 = setup_contract(router_sc::contract_obj);
+
+    // Sets the distribution to 100% for user_a
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup2.user_a_address),
+                    10000,
+                );
+            },
+        )
+        .assert_ok();
+
+    // Locks the contract
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.lock_distribution();
+            },
+        )
+        .assert_ok();
+
+    // Sets the distribution to 100% for user_b
+    setup
+        .blockchain_wrapper
+        .execute_tx(
+            &setup.owner_address,
+            &setup.contract_wrapper,
+            &rust_biguint!(0u64),
+            |sc| {
+                sc.add_distribution(
+                    ManagedAddress::from(setup3.user_b_address),
+                    10000,
+                );
+            },
+        )
+        .assert_user_error("Distribution is locked");
 }
